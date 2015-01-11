@@ -1,7 +1,7 @@
 {
-  "name": "koop-ckan",
-  "version": "0.0.4",
-  "description": "A ckan wrapper for koop",
+  "name": "koop-mongo",
+  "version": "0.0.1",
+  "description": "A mongo provider for koop",
   "main": "index.js",
   "directories": {
     "test": "test"
@@ -10,21 +10,19 @@
     "test": "mocha test/ -t 5000"
   },
   "dependencies": {
-    "config": "~0.4.35",
-    "csv": "~0.4.0",
     "ejs": "~1.0.0",
-    "request": "^2.51.0",
-    "sphericalmercator": "~1.0.2"
+    "mongojs": "^0.18.0"
   },
   "author": "Chris Helm",
   "license": "BSD-2-Clause",
   "devDependencies": {
+    "config": "~0.4.35",
     "supertest": "~0.11.0",
     "should": "~3.3.1",
     "koop": "~1.0.0"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com:chelm/koop-ckan.git"
+    "url": "https://github.com:chelm/koop-mongo.git"
   }
 }

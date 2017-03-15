@@ -5,14 +5,23 @@ This is a cache type provider for [Koop](https://koopjs.github.io). It pulls Geo
 ## Mongo Quick Tips
 
 Start mongo on bitnami ``` sudo /opt/bitnami/ctlscript.sh start mongodb ```
+
 Stop mongo on bitnami ``` sudo /opt/bitnami/ctlscript.sh stop mongodb ```
+
 Restart mongo on bitnami ``` sudo /opt/bitnami/ctlscript.sh restart mongodb ```
+
 Open mongo shell ``` mongo ```
+
 Show databases in shell ``` show dbs ```
+
 Use a database ``` use <db> ```
+
 Show collections in a database ``` show collections ```
+
 Quit mongo shell ``` \q ```
+
 Import JSON documents into Mongo ``` mongoimport --db geodata -c restaurants --file "food_inspections.geojson" --jsonArray ```
+
 ~ note the geojson file should only contain the features array piece and nothing else, ie. [feat1, feat2, feat3]
 
 ## How to use

@@ -6,7 +6,7 @@ process.on('SIGTERM', () => process.exit(0))
 const Koop = require('koop')
 const koop = new Koop()
 
-// Install the Yelp Provider
+// Install the Mongo Provider
 const mongo = require('../')
 koop.register(mongo)
 

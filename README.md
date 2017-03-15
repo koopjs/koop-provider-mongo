@@ -1,6 +1,6 @@
 # Koop Provider Mongo
 
-This is a cache type provider for [Koop](https://koopjs.github.io). It pulls data from MongoDB and translates the response to GeoJSON and then gets served out a EsriJSON with Feature Service capabilities for use with ArcGIS products.
+This is a cache type provider for [Koop](https://koopjs.github.io). It pulls GeoJSON data from a MongoDB document collection and translates the response into EsriJSON with some Feature Service capabilities to support ArcGIS products.
 
 ## Mongo Quick Tips
 

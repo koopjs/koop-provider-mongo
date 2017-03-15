@@ -1,28 +1,38 @@
 {
   "name": "koop-mongo",
-  "version": "0.0.1",
-  "description": "A mongo provider for koop",
+  "version": "0.0.2",
+  "description": "A MongoDB provider for koop ",
   "main": "index.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
-    "test": "mocha test/ -t 5000"
+    "docker-build": "docker build -t koop-mongo .",
+    "docker-start": "docker run -it -p 8080:8080 koop-mongo",
+    "test": "mocha test/"
   },
   "dependencies": {
-    "ejs": "~1.0.0",
-    "mongojs": "^0.18.0"
+    "config": "^1.25.1",
+    "mongodb": "^2.2.24"
   },
-  "author": "Chris Helm",
+  "author": "Esri",
   "license": "BSD-2-Clause",
   "devDependencies": {
-    "config": "~0.4.35",
     "supertest": "~0.11.0",
-    "should": "~3.3.1",
-    "koop": "~1.0.0"
+    "should": "~4.0.4",
+    "sinon": "~1.10.3"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com:chelm/koop-mongo.git"
-  }
+    "url": "https://github.com:koopjs/koop-mongo.git"
+  },
+  "bugs": {
+    "url": "https://github.com/koopjs/koop-mongo/issues"
+  },
+  "homepage": "https://github.com/koopjs/koop-mongo",
+  "keywords": [
+    "koop",
+    "mongo",
+    "nosql"
+  ]
 }

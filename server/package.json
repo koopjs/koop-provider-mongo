@@ -1,0 +1,15 @@
+{
+  "name": "koop-mongo-server",
+  "version": "1.0.0",
+  "description": "A reference implementation of Koop MongoDB",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Esri",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "koop": "^3.5.0"
+  }
+}

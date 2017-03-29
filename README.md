@@ -1,6 +1,12 @@
 # Koop Provider Mongo
 
-This is a cache type provider for [Koop](https://koopjs.github.io). It pulls GeoJSON data from a MongoDB document collection and translates the response into EsriJSON with some Feature Service capabilities to support ArcGIS products.
+This is a cache type provider for [Koop](https://koopjs.github.io). It pulls GeoJSON data from a MongoDB document collection and translates the response into EsriJSON with some Feature Service capabilities to support ArcGIS products. 
+If the document collection contains GeoJSON this provider will work, otherwise additional work may be needed for formatting a feature.   
+This provider implements Koop's request ID parameter to enable querying for specified document collections. 
+
+eg. http://localhost:3000/mongo/restaurants/featureserver/0/query
+
+eg. http://localhost:3000/mongo/volunteers/featureserver/0/query  
 
 ## Mongo Quick Tips
 
@@ -23,6 +29,9 @@ Quit mongo shell ``` \q ```
 Import JSON documents into Mongo ``` mongoimport --db geodata -c restaurants --file "food_inspections.geojson" --jsonArray ```
 
 ~ note the geojson file should only contain the features array piece and nothing else, ie. [feat1, feat2, feat3]
+
+## Sample data for loading into MongoDB
+[volunteers.geojson](https://gist.github.com/phpmaps/149df07dda69bb16dddec1a6e524dd76)
 
 ## How to use
 

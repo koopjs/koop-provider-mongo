@@ -10,16 +10,16 @@
     "test": "mocha test/ -t 5000"
   },
   "dependencies": {
-    "ejs": "~1.0.0",
-    "mongojs": "^0.18.0"
+    "ejs": "~2.5.7",
+    "mongojs": "^2.4.1"
   },
   "author": "Chris Helm",
   "license": "BSD-2-Clause",
   "devDependencies": {
-    "config": "~0.4.35",
-    "supertest": "~0.11.0",
-    "should": "~3.3.1",
-    "koop": "~1.0.0"
+    "config": "~1.26.2",
+    "supertest": "~3.0.0",
+    "should": "~11.2.1",
+    "koop": "~3.5.1"
   },
   "repository": {
     "type": "git",

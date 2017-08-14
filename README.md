@@ -1,6 +1,8 @@
 ## Mongo Provider for [Koop](https://github.com/Esri/koop)
 -----------
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/koopjs/koop-provider-mongo.svg)](https://greenkeeper.io/)
+
 This provider makes it possible to access a collection of json documents in MongoDB as either GeoJSON or an Esri FeatureService. This is particular useful for making maps and doing analysis on the web.
 
 ## Installation

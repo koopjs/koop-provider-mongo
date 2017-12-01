@@ -10,7 +10,7 @@
     "test": "mocha test/ -t 5000"
   },
   "dependencies": {
-    "ejs": "~1.0.0",
+    "ejs": "~2.5.5",
     "mongojs": "^0.18.0"
   },
   "author": "Chris Helm",

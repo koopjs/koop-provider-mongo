@@ -1,28 +1,25 @@
 {
-  "name": "koop-mongo",
-  "version": "0.0.1",
-  "description": "A mongo provider for koop",
+  "name": "@koopjs/provider-mongodb",
+  "version": "1.0.0",
+  "description": "Koop provider for mongodb.",
   "main": "index.js",
-  "directories": {
-    "test": "test"
-  },
   "scripts": {
-    "test": "mocha test/ -t 5000"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "author": "",
+  "license": "Apache-2.0",
   "dependencies": {
-    "ejs": "~2.5.5",
-    "mongojs": "^0.18.0"
+    "@koopjs/geoservice-utils": "^2.1.1",
+    "@synatic/noql": "^2.1.17",
+    "config": "^3.3.9",
+    "mongodb": "^6.1.0"
   },
-  "author": "Chris Helm",
-  "license": "BSD-2-Clause",
   "devDependencies": {
-    "config": "~0.4.35",
-    "supertest": "~0.11.0",
-    "should": "~3.3.1",
-    "koop": "~1.0.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com:chelm/koop-mongo.git"
+    "@koopjs/koop-core": "^9.2.8",
+    "bson": "^6.1.0",
+    "eslint": "^8.51.0",
+    "eslint-plugin-no-only-tests": "^3.1.0",
+    "gh-release": "^7.0.2",
+    "jest": "^29.7.0"
   }
 }

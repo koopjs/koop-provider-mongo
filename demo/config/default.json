@@ -1,0 +1,16 @@
+{
+  "mongodb": {
+      "connectString": "mongodb://localhost:27017",
+      "databases": {
+        "cdf-sample-data": {
+          "fires": {
+            "geometryField": "location",
+            "idField": "_id",
+            "cacheTtl": 0,
+            "crs": 4326,
+            "maxRecordCount": 2000
+          }
+        }
+      }
+  }
+}

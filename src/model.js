@@ -41,52 +41,57 @@ class Model {
       maxRecordCount = 2000,
     } = this.#databaseLookup[databaseName]?.[collectionName] || {};
 
-    // Access specific database collection
-    const collection = this.#client.db(databaseName).collection(collectionName);
+    try {
+      // Access specific database collection
+      const collection = this.#client.db(databaseName).collection(collectionName);
 
-    // Get request query/body params
-    const geoserviceParams = req.query;
-    const { resultRecordCount = maxRecordCount } = geoserviceParams;
-
-    // Convert Geoservice params to MongoDB equivalents
-    const { query, limit, skip, sort } =
-      convertGeoserviceParamsToMongoEquivalents({
-        ...geoserviceParams,
-        geometryField,
-        idField,
-        crs,
-        resultRecordCount,
+      // Get request query/body params
+      const geoserviceParams = req.query;
+      const { resultRecordCount = maxRecordCount } = geoserviceParams;
+  
+      // Convert Geoservice params to MongoDB equivalents
+      const { query, limit, skip, sort } =
+        convertGeoserviceParamsToMongoEquivalents({
+          ...geoserviceParams,
+          geometryField,
+          idField,
+          crs,
+          resultRecordCount,
+        });
+  
+      // Get data from MongoDB
+      const results = await collection
+        .find(query || {})
+        .limit(limit || maxRecordCount)
+        .skip(skip || 0)
+        .sort(sort || {})
+        .project(buildProjection(geoserviceParams.outFields, '_id', 'location'))
+        .toArray();
+  
+      const features = results.map((record) => {
+        const { [geometryField]: geometry, ...properties } = record;
+        return { geometry, properties };
       });
-
-    // Get data from MongoDB
-    const results = await collection
-      .find(query || {})
-      .limit(limit || maxRecordCount)
-      .skip(skip || 0)
-      .sort(sort || {})
-      .project(buildProjection(geoserviceParams.outFields, '_id', 'location'))
-      .toArray();
-
-    const features = results.map((record) => {
-      const { [geometryField]: geometry, ...properties } = record;
-      return { geometry, properties };
-    });
-
-    const geojson = {
-      type: 'FeatureCollection',
-      features,
-      metadata: { idField, maxRecordCount },
-      filtersApplied: {
-        where: true,
-        objectIds: true,
-        geometry: true,
-        resultRecordCount: true,
-        resultOffset: true,
-      },
-      ttl: cacheTtl,
-      crs,
-    };
-    callback(null, geojson);
+  
+      const geojson = {
+        type: 'FeatureCollection',
+        features,
+        metadata: { idField, maxRecordCount },
+        filtersApplied: {
+          where: true,
+          objectIds: true,
+          geometry: true,
+          resultRecordCount: true,
+          resultOffset: true,
+        },
+        ttl: cacheTtl,
+        crs,
+      };
+      callback(null, geojson);
+    } catch (error) {
+      this.#logger.error(`MongoDB Provider: ${JSON.stringify(error)}`);
+      callback(error);
+    }
   }
 }
 

@@ -1,8 +1,9 @@
 {
   "mongodb": {
       "connectString": "mongodb://localhost:27017",
+      "definedCollectionsOnly": true,
       "databases": {
-        "cdf-sample-data": {
+        "sample-data": {
           "fires": {
             "geometryField": "location",
             "idField": "_id",

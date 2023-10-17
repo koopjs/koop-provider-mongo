@@ -28,7 +28,7 @@ async function run() {
       fs.createWriteStream('wildfires.json'),
     );
 
-    const db = client.db('cdf-sample-data');
+    const db = client.db('sample-data');
     const firesCollection = db.collection('fires');
     const features = require('./wildfires.json');
 

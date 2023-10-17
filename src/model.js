@@ -13,11 +13,12 @@ const relationLookup = {
 class Model {
   #client;
   #databaseLookup;
+  #definedCollectionsOnly;
   #logger;
 
-  constructor({ logger }, { conn, databaseLookup }) {
+  constructor({ logger }, { connectString, databases, definedCollectionsOnly }) {
     this.#logger = logger;
-    const databaseUri = conn || config.mongodb.connectString;
+    const databaseUri = connectString || config.mongodb.connectString;
     this.#client = new MongoClient(databaseUri, {
       serverApi: {
         version: ServerApiVersion.v1,
@@ -25,17 +26,28 @@ class Model {
         deprecationErrors: true,
       },
     });
-    this.#databaseLookup = databaseLookup || config.mongodb.databases;
+    this.#databaseLookup = databases || config.mongodb.databases;
+    this.#definedCollectionsOnly = definedCollectionsOnly || config.mongodb.definedCollectionsOnly;
   }
 
   async getData(req, callback) {
     // Parse the "id" parameter from route-path
     const [databaseName, collectionName] = req.params.id.split('::');
 
+    // Lookup collection config
+    const collectionConfig = this.#databaseLookup[databaseName]?.[collectionName];
+
+    // If no defined collection-config and definedCollectionsOnly, reject with 404
+    if (!collectionConfig && this.#definedCollectionsOnly) {
+      const error = new Error('Not Found');
+      error.code = 404;
+      callback(error);
+    }
+
     // Get collection specific config data
     const {
       geometryField,
-      idField,
+      idField = '_id',
       cacheTtl = 0,
       crs = 4326,
       maxRecordCount = 2000,

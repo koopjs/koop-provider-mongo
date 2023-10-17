@@ -4,7 +4,11 @@
   "description": "Koop provider for mongodb.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest",
+    "test:cov": "jest --coverage",
+    "lint": "eslint \"**/*.js\"",
+    "lint:ci": "eslint \"**/*.js\" --rule linebreak-style:0 ",
+    "lint:fix": "eslint \"**/*.js\" --fix"
   },
   "author": "",
   "license": "Apache-2.0",

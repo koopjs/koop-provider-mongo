@@ -14,6 +14,15 @@
       "outputCapture": "console"
     },
     {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch Tester",
+      "cwd": "${workspaceFolder}/demo",
+      "program": "tester.js",
+      "console": "integratedTerminal",
+      "outputCapture": "console"
+    },
+    {
       "name": "Debug Jest Tests",
       "type": "node",
       "request": "launch",
@@ -26,7 +35,10 @@
       ],
       "console": "integratedTerminal",
       "outputCapture": "console",
-      "runtimeExecutable": "/usr/local/bin/node",
+      "env": {
+        "SUPPRESS_CONFIG_WARNINGS": "true",
+      }
+      //"runtimeExecutable": "/usr/local/bin/node",
     }
   ]
 }

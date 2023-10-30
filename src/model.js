@@ -1,13 +1,13 @@
 const { MongoClient, ServerApiVersion } = require('mongodb');
-const SQLParser = require('@synatic/noql');
-const {
-  standardizeGeometryFilter,
-  combineObjectIdsAndWhere,
-} = require('@koopjs/geoservice-utils');
 const config = require('config');
-const relationLookup = {
-  esriSpatialRelIntersects: '$geoIntersects',
-  esriSpatialRelWithin: '$geoWithin',
+const { convertGeoserviceParamsToDbParams } = require('./helpers');
+
+const filtersApplied = {
+  where: true,
+  objectIds: true,
+  geometry: true,
+  resultRecordCount: true,
+  resultOffset: true,
 };
 
 class Model {
@@ -16,9 +16,12 @@ class Model {
   #definedCollectionsOnly;
   #logger;
 
-  constructor({ logger }, { connectString, databases, definedCollectionsOnly }) {
+  constructor(
+    { logger },
+    { connectString, databases, definedCollectionsOnly } = {},
+  ) {
     this.#logger = logger;
-    const databaseUri = connectString || config.mongodb.connectString;
+    const databaseUri = connectString || config?.mongodb?.connectString;
     this.#client = new MongoClient(databaseUri, {
       serverApi: {
         version: ServerApiVersion.v1,
@@ -26,132 +29,116 @@ class Model {
         deprecationErrors: true,
       },
     });
-    this.#databaseLookup = databases || config.mongodb.databases;
-    this.#definedCollectionsOnly = definedCollectionsOnly || config.mongodb.definedCollectionsOnly;
+    this.#databaseLookup = databases || config?.mongodb?.databases || {};
+    this.#definedCollectionsOnly =
+      definedCollectionsOnly ||
+      config?.mongodb?.definedCollectionsOnly ||
+      false;
   }
 
   async getData(req, callback) {
     // Parse the "id" parameter from route-path
     const [databaseName, collectionName] = req.params.id.split('::');
 
+    // Get request query/body params
+    const geoserviceParams = req.query;
+
+    try {
+      // Access specific database collection
+      const collection = this.#client
+        .db(databaseName)
+        .collection(collectionName);
+
+      // Fetch collection metadata
+      const {
+        geometryField,
+        idField = '_id',
+        cacheTtl = 0,
+        crs = 4326,
+        maxRecordCount = 2000,
+      } = this.#getMetadata(databaseName, collectionName);
+
+      // Convert Geoservice params to MongoDB query equivalents
+      const dbParams = convertGeoserviceParamsToDbParams({
+        ...geoserviceParams,
+        geometryField,
+        idField,
+        crs,
+        resultRecordCount: maxRecordCount,
+      });
+
+      // for aggregate requests, aggregate directly with MongoDB
+      if (geoserviceParams.returnCountOnly || geoserviceParams.returnExtentOnly) {
+        const result = await aggregateDocs(collection, dbParams.pipeline);
+        return callback(null, result);
+      }
+
+      // Fetch docs from Mongo
+      const docs = await fetchDocs({
+        dbParams,
+        collection,
+        outFields: geoserviceParams.outFields,
+        idField,
+        geometryField,
+      });
+
+      // Convert docs to geojson
+      const geojson = convertDocsToGeoJSON(docs, geometryField);
+
+      return callback(null, {
+        ...geojson,
+        metadata: { idField, maxRecordCount },
+        filtersApplied,
+        ttl: cacheTtl,
+        crs,
+      });
+    } catch (error) {
+      this.#logger.error(`MongoDB Provider: ${JSON.stringify(error)}`);
+      return callback(error);
+    }
+  }
+
+  #getMetadata(databaseName, collectionName) {
     // Lookup collection config
-    const collectionConfig = this.#databaseLookup[databaseName]?.[collectionName];
+    const collectionConfig =
+      this.#databaseLookup[databaseName]?.[collectionName];
 
     // If no defined collection-config and definedCollectionsOnly, reject with 404
     if (!collectionConfig && this.#definedCollectionsOnly) {
       const error = new Error('Not Found');
       error.code = 404;
-      callback(error);
+      throw error;
     }
 
     // Get collection specific config data
-    const {
-      geometryField,
-      idField = '_id',
-      cacheTtl = 0,
-      crs = 4326,
-      maxRecordCount = 2000,
-    } = this.#databaseLookup[databaseName]?.[collectionName] || {};
-
-    try {
-      // Access specific database collection
-      const collection = this.#client.db(databaseName).collection(collectionName);
-
-      // Get request query/body params
-      const geoserviceParams = req.query;
-      const { resultRecordCount = maxRecordCount } = geoserviceParams;
-  
-      // Convert Geoservice params to MongoDB equivalents
-      const { query, limit, skip, sort } =
-        convertGeoserviceParamsToMongoEquivalents({
-          ...geoserviceParams,
-          geometryField,
-          idField,
-          crs,
-          resultRecordCount,
-        });
-  
-      // Get data from MongoDB
-      const results = await collection
-        .find(query || {})
-        .limit(limit || maxRecordCount)
-        .skip(skip || 0)
-        .sort(sort || {})
-        .project(buildProjection(geoserviceParams.outFields, '_id', 'location'))
-        .toArray();
-  
-      const features = results.map((record) => {
-        const { [geometryField]: geometry, ...properties } = record;
-        return { geometry, properties };
-      });
-  
-      const geojson = {
-        type: 'FeatureCollection',
-        features,
-        metadata: { idField, maxRecordCount },
-        filtersApplied: {
-          where: true,
-          objectIds: true,
-          geometry: true,
-          resultRecordCount: true,
-          resultOffset: true,
-        },
-        ttl: cacheTtl,
-        crs,
-      };
-      callback(null, geojson);
-    } catch (error) {
-      this.#logger.error(`MongoDB Provider: ${JSON.stringify(error)}`);
-      callback(error);
-    }
+    return this.#databaseLookup[databaseName]?.[collectionName] || {};
   }
 }
 
-function convertGeoserviceParamsToMongoEquivalents(params) {
-  const { geometry, geometryField } = params;
-
-  // Convert geoservice where, objectIds, resultRecordCount, result offset to SQL equivalent
-  const sql = buildSqlQuery(params);
-
-  // Convert SQL to MongoDB "find" parameters
-  const mongoFindParams = SQLParser.parseSQL(sql);
-
-  const { query = {} } = mongoFindParams;
-
-  // Add any geoservice geometry filter to the MongoDB "find" parameterization
-  if (geometry) {
-    const geometryFilter = standardizeGeometryFilter(params);
-    query[geometryField] = {
-      [relationLookup[geometryFilter.relation]]: {
-        $geometry: geometryFilter.geometry,
-      },
-    };
-  }
-
-  return { ...mongoFindParams, query };
+async function aggregateDocs(collection, aggregatePipeline) {
+  const cursor = await collection.aggregate(aggregatePipeline);
+  const result = (await cursor.toArray())[0];
+  await cursor.close();
+  return result;
 }
 
-function buildSqlQuery(params) {
-  const {
-    where,
-    orderByFields,
-    objectIds,
-    resultRecordCount,
-    resultOffset,
-    idField,
-  } = params;
+async function fetchDocs({
+  dbParams,
+  collection,
+  outFields,
+  idField,
+  geometryField,
+}) {
+  const { query = {}, limit, skip = 0, sort = {} } = dbParams;
+  const projection = buildProjection(outFields, idField, geometryField);
 
-  // combine the "where" and "objectIds"
-  const combinedWhere = combineObjectIdsAndWhere({ where, objectIds, idField });
-  const whereClause = combinedWhere ? ` WHERE ${combinedWhere}` : '';
-
-  const orderByClause = orderByFields ? ` ORDER BY ${orderByFields}` : '';
-
-  const limitClause = resultRecordCount ? ` LIMIT ${resultRecordCount}` : '';
-
-  const offsetClause = resultOffset ? ` OFFSET ${resultOffset}` : '';
-
-  return `SELECT * FROM collection${whereClause}${orderByClause}${limitClause}${offsetClause}`;
+  return collection
+    .find(query)
+    .limit(limit)
+    .skip(skip)
+    .sort(sort)
+    .project(projection)
+    .toArray();
 }
 
 function buildProjection(outFields = '*', idField, geometryField) {
@@ -175,6 +162,18 @@ function buildProjection(outFields = '*', idField, geometryField) {
   }
 
   return projection;
+}
+
+function convertDocsToGeoJSON(docs, geometryField) {
+  const features = docs.map((record) => {
+    const { [geometryField]: geometry, ...properties } = record;
+    return { geometry, properties };
+  });
+
+  return {
+    type: 'FeatureCollection',
+    features,
+  };
 }
 
 module.exports = Model;

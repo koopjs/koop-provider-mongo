@@ -17,7 +17,7 @@
     "@synatic/noql": "^2.1.17",
     "config": "^3.3.9",
     "lodash": "^4.17.21",
-    "mongodb": "^6.1.0"
+    "mongodb": "^6.2.0"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.23.2",

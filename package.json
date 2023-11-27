@@ -21,7 +21,7 @@
   },
   "devDependencies": {
     "@babel/preset-env": "^7.23.3",
-    "@koopjs/koop-core": "^9.2.8",
+    "@koopjs/koop-core": "^10.0.0",
     "babel-preset-env": "^1.7.0",
     "bson": "^6.2.0",
     "cd": "^0.3.3",

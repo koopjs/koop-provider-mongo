@@ -14,7 +14,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@koopjs/geoservice-utils": "^2.2.1",
-    "@synatic/noql": "^2.1.17",
+    "@synatic/noql": "^2.1.18",
     "config": "^3.3.9",
     "lodash": "^4.17.21",
     "mongodb": "^6.3.0"

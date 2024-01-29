@@ -20,12 +20,12 @@
     "mongodb": "^6.3.0"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.23.3",
-    "@koopjs/koop-core": "^10.0.0",
+    "@babel/preset-env": "^7.23.9",
+    "@koopjs/koop-core": "^10.2.0",
     "babel-preset-env": "^1.7.0",
     "bson": "^6.2.0",
     "cd": "^0.3.3",
-    "eslint": "^8.54.0",
+    "eslint": "^8.56.0",
     "eslint-plugin-no-only-tests": "^3.1.0",
     "gh-release": "^7.0.2",
     "jest": "^29.7.0"
